@@ -1,0 +1,18 @@
+{
+    "--begin--":    "修改后可能需要重新验证设备。",
+    "product":      "iarim",
+    "device":       "sagit",
+    "board":        "eomam",
+    "brand":        "Xiaomi",
+    "model":        "MI 5",
+    "wifi_ssid":    "TP-LINK-f88f73a8",
+    "bootloader":   "U-boot",
+    "--end--":      "下面的请勿随意修改，除非你知道你在做什么。",
+    "android_id":   "BRAND.434762.236",
+    "boot_id":      "ee06b515-a0ab-4a31-a339-fcd5b61c4815",
+    "proc_version": "Linux version 4.19.71-68267 (oicq@takayama.github.com)",
+    "mac_address":  "88:E9:FE:80:5E:BB",
+    "ip_address":   "10.0.13.17",
+    "imei":         "352302094489535",
+    "incremental":  "4191011"
+}
