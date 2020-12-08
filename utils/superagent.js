@@ -1,7 +1,7 @@
 const superagent = require("superagent");
 
 //请求
-function req(url, method, params, data, cookies) {
+function request(url, method, params, data, cookies) {
   return new Promise(function (resolve, reject) {
     superagent(method, url)
       .query(params)
@@ -17,5 +17,5 @@ function req(url, method, params, data, cookies) {
 }
 
 module.exports = {
-  req,
+  request,
 };

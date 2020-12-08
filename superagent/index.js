@@ -1,18 +1,20 @@
-const superagent = require("./superagent");
-// const config = require("../config/index");
+const superagent = require("../utils/superagent");
+const config = require("../config/index");
 const cheerio = require("cheerio");
-// const { machineIdSync } = require("node-machine-id");
+const getReqSign = require("../utils/getReqSign");
 // const crypto = require("crypto");
 // let md5 = crypto.createHash("md5");
+// const { machineIdSync } = require("node-machine-id");
 // let uniqueId = md5.update(machineIdSync()).digest("hex"); // 获取机器唯一识别码并MD5，方便机器人上下文关联
-const ONE = "http://wufazhuce.com/"; // ONE的web版网站
-const TXHOST = "http://api.tianapi.com/txapi/"; // 天行host
+// const TXHOST = "http://api.tianapi.com/txapi/"; // 天行host
 // const TULINGAPI = "http://www.tuling123.com/openapi/api"; // 图灵1.0接口api
+const ONE = "http://wufazhuce.com/"; // ONE的web版网站
+const weatherURL = `https://tianqi.moji.com/weather/china/${config.CITY}`;
 
+// 获取每日一句
 async function getOne() {
-  // 获取每日一句
   try {
-    let res = await superagent.req(ONE, "GET");
+    let res = await superagent.request(ONE, "GET");
     let $ = cheerio.load(res.text);
     let todayOneList = $("#carousel-one .carousel-inner .item");
     let todayOne = $(todayOneList[0])
@@ -26,35 +28,82 @@ async function getOne() {
   }
 }
 
-async function getTXweather() {
-  // 获取天行天气
-  let url = TXHOST + "tianqi/";
+// 获取墨迹天气提示信息
+async function getWeather() {
   try {
-    let res = await superagent.req(url, "GET", {
-      key: "762be789103e1ae7b65573f8d4fc0df6",
-      city: "深圳",
-    });
-    let content = JSON.parse(res.text);
-    if (content.code === 200) {
-      let todayInfo = content.newslist[0];
-      let obj = {
-        weatherTips: todayInfo.tips,
-        todayWeather: `今天${todayInfo.weather}<br>温度:${todayInfo.lowest}/${todayInfo.highest}<br>${todayInfo.wind} ${todayInfo.windspeed}<br>空气:${todayInfo.air_level} ${todayInfo.air}<br>`,
-      };
-      console.log("获取天行天气成功", obj);
-      return obj;
-    } else {
-      console.log("获取接口失败", content.code);
+    const res = await superagent.request(weatherURL, "GET");
+    let html = res.text || "";
+    let $ = cheerio.load(html);
+    let desc = $(".wea_weather b").text().trim();
+    let temp = $(".wea_weather em").text().trim() + "℃";
+    let water = $(".wea_about span").text().trim();
+    let wind = $(".wea_about em").text().trim();
+    let tips = $(".wea_tips em").text().trim();
+    let live = $(".live_index_grid dl");
+    let live_str;
+    let live_number = 0;
+    for (let item in live) {
+      if (!isNaN(item)) {
+        let key;
+        let value;
+        if (live[item]) {
+          for (let issue of live[item].children) {
+            if (issue.name === "dt") {
+              value = issue.children[0].data;
+            }
+            if (issue.name === "dd") {
+              key = issue.children[0].data;
+            }
+          }
+        }
+        if (key === "紫外线") {
+          live_str = `${key}：${value}`;
+        }
+        if (value === "适宜") {
+          live_number = live_number + 1;
+          live_str = `${live_str}\n${key}：${value}`;
+        }
+        if (live_number > 2) {
+          break;
+        }
+      }
     }
+    let words = `深圳今日实时天气${desc}\n温度：${temp}\n湿度：${water}\n风力：${wind}\n${live_str}\n今日天气提示：${tips}`;
+    return words;
   } catch (err) {
-    console.log("获取接口失败", err);
+    console.log("错误", err);
+    return err;
+  }
+}
+
+// 腾讯AI智能闲聊机器人
+async function getTecentReply(word) {
+  let url = "https://api.ai.qq.com/fcgi-bin/nlp/nlp_textchat";
+  let obj = {
+    app_id: config.TECENT_APPID,
+    session: "tecentBot",
+    time_stamp: parseInt(new Date().getTime() / 1000),
+    nonce_str: parseInt(new Date().getTime() / 1000),
+    question: word,
+    sign: "",
+  };
+  obj.sign = getReqSign.getReqSign(obj);
+  let res = await superagent.request(url, "GET", obj);
+  let content = JSON.parse(res.text);
+  if (content.ret === 0) {
+    let response = content.data.answer;
+    console.log(response);
+    return response;
+  } else {
+    console.log(content.msg);
+    return "我好像迷失在无边的网络中了，接口调用错误：" + content.msg;
   }
 }
 
 // 天行对接的图灵机器人
 async function getTXTLReply(word) {
   let url = TXHOST + "tuling/";
-  let res = await superagent.req(url, "GET", {
+  let res = await superagent.request(url, "GET", {
     key: config.TXAPIKEY,
     question: word,
     userid: uniqueId,
@@ -72,7 +121,7 @@ async function getTXTLReply(word) {
 // 图灵智能聊天机器人
 async function getTuLingReply(word) {
   let url = TULINGAPI;
-  let res = await superagent.req(url, "GET", {
+  let res = await superagent.request(url, "GET", {
     key: config.TULINGKEY,
     info: word,
   });
@@ -87,7 +136,7 @@ async function getTuLingReply(word) {
 // 天行聊天机器人
 async function getReply(word) {
   let url = TXHOST + "robot/";
-  let res = await superagent.req(url, "GET", {
+  let res = await superagent.request(url, "GET", {
     key: config.TXAPIKEY,
     question: word,
     mode: 1,
@@ -111,24 +160,6 @@ async function getReply(word) {
   }
 }
 
-async function getSweetWord() {
-  // 获取土味情话
-  let url = TXHOST + "saylove/";
-  try {
-    let res = await superagent.req(url, "GET", { key: config.TXAPIKEY });
-    let content = JSON.parse(res.text);
-    if (content.code === 200) {
-      let sweet = content.newslist[0].content;
-      let str = sweet.replace("\r\n", "<br>");
-      return str;
-    } else {
-      console.log("获取接口失败", content.msg);
-    }
-  } catch (err) {
-    console.log("获取接口失败", err);
-  }
-}
-
 /**
  * 获取垃圾分类结果
  * @param {String} word 垃圾名称
@@ -136,7 +167,7 @@ async function getSweetWord() {
 
 async function getRubbishType(word) {
   let url = TXHOST + "lajifenlei/";
-  let res = await superagent.req(url, "GET", {
+  let res = await superagent.request(url, "GET", {
     key: config.TXAPIKEY,
     word: word,
   });
@@ -170,9 +201,9 @@ async function getRubbishType(word) {
 
 module.exports = {
   getOne,
-  getTXweather,
+  getWeather,
+  getTecentReply,
   //   getReply,
-  //   getSweetWord,
   //   getTuLingReply,
   //   getTXTLReply,
   //   getRubbishType,
