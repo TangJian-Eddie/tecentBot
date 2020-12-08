@@ -7,7 +7,6 @@ const getReqSign = require("../utils/getReqSign");
 // const { machineIdSync } = require("node-machine-id");
 // let uniqueId = md5.update(machineIdSync()).digest("hex"); // 获取机器唯一识别码并MD5，方便机器人上下文关联
 // const TXHOST = "http://api.tianapi.com/txapi/"; // 天行host
-// const TULINGAPI = "http://www.tuling123.com/openapi/api"; // 图灵1.0接口api
 const ONE = "http://wufazhuce.com/"; // ONE的web版网站
 const weatherURL = `https://tianqi.moji.com/weather/china/${config.CITY}`;
 
@@ -100,39 +99,6 @@ async function getTecentReply(word) {
   }
 }
 
-// 天行对接的图灵机器人
-async function getTXTLReply(word) {
-  let url = TXHOST + "tuling/";
-  let res = await superagent.request(url, "GET", {
-    key: config.TXAPIKEY,
-    question: word,
-    userid: uniqueId,
-  });
-  let content = JSON.parse(res.text);
-  if (content.code === 200) {
-    console.log("天行对接的图灵机器人:", content);
-    let response = content.newslist[0].reply;
-    return response;
-  } else {
-    return "我好像迷失在无边的网络中了，接口调用错误：" + content.msg;
-  }
-}
-
-// 图灵智能聊天机器人
-async function getTuLingReply(word) {
-  let url = TULINGAPI;
-  let res = await superagent.request(url, "GET", {
-    key: config.TULINGKEY,
-    info: word,
-  });
-  let content = JSON.parse(res.text);
-  if (content.code === 100000) {
-    return content.text;
-  } else {
-    return "出错了：" + content.text;
-  }
-}
-
 // 天行聊天机器人
 async function getReply(word) {
   let url = TXHOST + "robot/";
@@ -204,7 +170,5 @@ module.exports = {
   getWeather,
   getTecentReply,
   //   getReply,
-  //   getTuLingReply,
-  //   getTXTLReply,
   //   getRubbishType,
 };
