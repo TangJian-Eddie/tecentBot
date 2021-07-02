@@ -1,0 +1,18 @@
+{
+    "--begin--":    "修改后可能需要重新验证设备。",
+    "product":      "iarim",
+    "device":       "sagit",
+    "board":        "eomam",
+    "brand":        "Xiaomi",
+    "model":        "MI 3",
+    "wifi_ssid":    "TP-LINK-1c40bc224",
+    "bootloader":   "U-boot",
+    "--end--":      "下面的请勿随意修改，除非你知道你在做什么。",
+    "android_id":   "BRAND.451667.180",
+    "boot_id":      "7333cc46-63a0-4690-b44a-48225b681901",
+    "proc_version": "Linux version 4.19.71-77179 (oicq@takayama.github.com)",
+    "mac_address":  "88:E9:FE:80:5E:BB",
+    "ip_address":   "10.0.15.19",
+    "imei":         "868130038962466",
+    "incremental":  "4311379"
+}

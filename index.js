@@ -22,29 +22,30 @@ async function initUser() {
   bot.sendPrivateMsg(config.TECENT_ACCOUNT, weather);
 }
 // 主程序
-const bot = createClient(uin);
-bot.login(password_md5);
-// 验证码登录
-bot.on("system.login.captcha", () => {
+const bot = createClient(uin, config.LOGIN_COFIG);
+//监听并输入滑动验证码ticket(同一设备只需验证一次)
+bot.on("system.login.slider", () => {
   process.stdin.once("data", (input) => {
-    bot.captchaLogin(input);
+    bot.sliderLogin(input);
+  });
+});
+//监听设备锁验证(同一设备只需验证一次)
+bot.on("system.login.device", () => {
+  bot.logger.info("验证完成后敲击Enter继续..");
+  process.stdin.once("data", () => {
+    bot.login();
   });
 });
 // 成功上线
-bot.on("system.online", initUser);
+bot.on("system.online", function () {
+  console.log("Logged in");
+  initUser();
+});
 // 监听信息
-bot.on("message", async (data) => {
-  if (
-    data.message_type === "private" &&
-    data.user_id === config.TECENT_ACCOUNT
-  ) {
-    console.log(data.message);
+bot.on("message.private", async (data) => {
+  console.log(data);
+  if (data.user_id === config.TECENT_ACCOUNT) {
     let response = "你是最傻的屁";
-    for (let item of data.message) {
-      if (item.type === "text") {
-        response = await superagent.getTecentReply(item.data.text);
-      }
-    }
     const res = await bot.sendPrivateMsg(data.user_id, response);
     bot.sendPrivateMsg(data.user_id, `[CQ:image,file=${hugImg}]`);
     if (res.status !== "ok") {
@@ -54,6 +55,7 @@ bot.on("message", async (data) => {
 });
 bot.on("request", (data) => console.log(data));
 bot.on("notice", (data) => console.log(data));
+bot.login(password_md5);
 
 // 定时喝水任务
 let rule = new schedule.RecurrenceRule();
