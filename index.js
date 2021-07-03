@@ -11,8 +11,8 @@ const password_md5 = cryto.createHash("md5").update(password).digest("hex");
 const hugImg = path.resolve(config.HUG_IMG);
 
 async function initUser() {
-  let one = await superagent.getOne(); //获取每日一句
-  let weather = await superagent.getWeather(); //获取天气信息
+  const one = await superagent.getOne(); //获取每日一句
+  const weather = await superagent.getWeather(); //获取天气信息
   bot.sendPrivateMsg(config.TECENT_ACCOUNT, `${config.NICKNAME}机器人上线了`);
   bot.sendPrivateMsg(
     config.TECENT_ACCOUNT,
@@ -33,7 +33,7 @@ bot.on("system.login.slider", () => {
 bot.on("system.login.device", () => {
   bot.logger.info("验证完成后敲击Enter继续..");
   process.stdin.once("data", () => {
-    bot.login();
+    bot.login(password_md5);
   });
 });
 // 成功上线
@@ -43,32 +43,51 @@ bot.on("system.online", function () {
 });
 // 监听信息
 bot.on("message.private", async (data) => {
-  console.log(data);
   if (data.user_id === config.TECENT_ACCOUNT) {
-    let response = "你是最傻的屁";
-    const res = await bot.sendPrivateMsg(data.user_id, response);
-    bot.sendPrivateMsg(data.user_id, `[CQ:image,file=${hugImg}]`);
-    if (res.status !== "ok") {
-      bot.sendPrivateMsg(data.user_id, "你是最傻的屁");
+    let message = "";
+    for (const item of data.message) {
+      if (item.type === "text") {
+        message = message + item.data.text;
+      }
     }
+    const res = message.includes("垃圾 ")
+      ? await superagent.getRubbishType(message.replace("垃圾 ", ""))
+      : await superagent.getTXAIAnswer(data.user_id, message);
+    await bot.sendPrivateMsg(data.user_id, res);
+    if (res === "你是最傻的屁")
+      bot.sendPrivateMsg(data.user_id, `[CQ:image,file=${hugImg}]`);
   }
 });
-bot.on("request", (data) => console.log(data));
-bot.on("notice", (data) => console.log(data));
+bot.on("request.group.add", (data) => {
+  bot.setGroupAddRequest(data.flag);
+});
 bot.login(password_md5);
 
-// 定时喝水任务
-let rule = new schedule.RecurrenceRule();
-Object.keys(config.REMIND_TIME).forEach((key) => {
-  if (typeof config.REMIND_TIME[key] !== "number") {
-    rule[key] = new schedule.Range(
-      config.REMIND_TIME[key][0],
-      config.REMIND_TIME[key][1]
-    );
-  } else {
-    rule[key] = config.REMIND_TIME[key];
-  }
+// 每天上线通知
+const initRule = new schedule.RecurrenceRule();
+for (const key in config.INIT_TIME) {
+  initRule[key] = config.INIT_TIME[key];
+}
+schedule.scheduleJob(initRule, () => {
+  bot.login(password_md5);
 });
-schedule.scheduleJob(rule, () => {
+// 定时喝水任务
+const remindRule = new schedule.RecurrenceRule();
+for (const key in config.REMIND_TIME) {
+  remindRule[key] = config.REMIND_TIME[key];
+}
+schedule.scheduleJob(remindRule, () => {
   bot.sendPrivateMsg(config.TECENT_ACCOUNT, "到整点的喝水时间了");
+});
+// 每天下线通知
+const offlineRule = new schedule.RecurrenceRule();
+for (const key in config.OFFLINE_TIME) {
+  offlineRule[key] = config.OFFLINE_TIME[key];
+}
+schedule.scheduleJob(offlineRule, async () => {
+  await bot.sendPrivateMsg(
+    config.TECENT_ACCOUNT,
+    "不知不觉又到了一天说再见的时间了，屁屁早些休息哦~"
+  );
+  bot.logout();
 });
