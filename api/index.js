@@ -1,8 +1,63 @@
-const superagent = require("../utils/superagent");
+const superagent = require("./superagent");
 const config = require("../config/index");
 const cheerio = require("cheerio");
 const ONE = "http://wufazhuce.com/"; // ONE的web版网站
 const weatherURL = `https://tianqi.moji.com/weather/china/${config.CITY}`;
+
+/**
+ * 设置定时提醒任务
+ * @param {*} obj 任务详情
+ * @returns {*} 任务详情
+ */
+ async function setSchedule(obj) {
+  try {
+    let option = {
+      method: 'POST',
+      url: apiConfig.KOAHOST + '/addSchedule',
+      params: obj
+    };
+    let res = await req(option);
+    let content = parseBody(res);
+    return content.data;
+  } catch (error) {
+    console.log('添加定时任务失败', error);
+  }
+}
+
+/**
+ * 获取定时提醒任务列表
+ */
+async function getScheduleList() {
+  try {
+    let option = {
+      method: 'GET',
+      url: apiConfig.KOAHOST + '/getScheduleList',
+      params: ''
+    };
+    let res = await req(option);
+    let text = parseBody(res);
+    let scheduleList = text.data;
+    return scheduleList;
+  } catch (error) {
+    console.log('获取定时任务失败:' + error);
+  }
+}
+/**
+ * 更新定时提醒任务
+ */
+async function updateSchedule(id) {
+  try {
+    let option = {
+      method: 'POST',
+      url: apiConfig.KOAHOST + '/updateSchedule',
+      params: { id: id }
+    };
+    let res = await req(option);
+    console.log('更新定时任务成功');
+  } catch (error) {
+    console.log('更新定时任务失败', error);
+  }
+}
 
 // 获取每日一句
 async function getOne() {
@@ -118,6 +173,9 @@ async function getRubbishType(word) {
 }
 
 module.exports = {
+  getScheduleList,
+  setSchedule,
+  updateSchedule,
   getOne,
   getWeather,
   getAIAnswer,

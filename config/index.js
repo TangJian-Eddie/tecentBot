@@ -1,7 +1,7 @@
 module.exports = {
   USER_CONFIG: {
     uin: 2630735172,
-    password: "jax19981203.",
+    password: "a7990944c4843ec1b459e4c85818c419",
   },
   LOGIN_COFIG: {
     log_level: "error",
