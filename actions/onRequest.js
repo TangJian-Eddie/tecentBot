@@ -1,12 +1,25 @@
 /**
  * 自动通过群申请
  */
-async function onGroup(bot,data) {
+function onGroupRequest(bot, data) {
+  // 仅通过主动申请的申请
+  if (data.sub_type === "add") {
     bot.setGroupAddRequest(data.flag);
+  }
+}
+/**
+ * 自动通过好友申请
+ */
+function onPrivateRequest(bot, data) {
+  bot.setGroupAddRequest(data.flag);
 }
 
-
-onRequest(){
-    
+function onRequest(bot, data) {
+  const REQUEST_TYPE_MAP = {
+    private: onPrivateRequest,
+    group: onGroupRequest,
+  };
+  REQUEST_TYPE_MAP[data.request_type](bot, data);
 }
+
 module.exports = onRequest;

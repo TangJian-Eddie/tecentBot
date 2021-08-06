@@ -1,6 +1,8 @@
 const { createClient } = require("oicq");
 const config = require("./config");
+const onLogin = require("./actions/onLogin");
 const onMessage = require("./actions/onMessage");
+const onRequest = require("./actions/onRequest");
 
 // 参数设定
 const { uin, password } = config.USER_CONFIG;

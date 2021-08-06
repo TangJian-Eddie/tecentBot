@@ -9,18 +9,14 @@ const weatherURL = `https://tianqi.moji.com/weather/china/${config.CITY}`;
  * @param {*} obj 任务详情
  * @returns {*} 任务详情
  */
- async function setSchedule(obj) {
+async function setSchedule(obj) {
   try {
-    let option = {
-      method: 'POST',
-      url: apiConfig.KOAHOST + '/addSchedule',
-      params: obj
-    };
-    let res = await req(option);
+    const url = config.HOST + "/addSchedule";
+    let res = await superagent.request(url, "POST", null, obj);
     let content = parseBody(res);
     return content.data;
   } catch (error) {
-    console.log('添加定时任务失败', error);
+    console.log("更新定时任务失败", error);
   }
 }
 
@@ -29,17 +25,13 @@ const weatherURL = `https://tianqi.moji.com/weather/china/${config.CITY}`;
  */
 async function getScheduleList() {
   try {
-    let option = {
-      method: 'GET',
-      url: apiConfig.KOAHOST + '/getScheduleList',
-      params: ''
-    };
-    let res = await req(option);
-    let text = parseBody(res);
+    const url = config.HOST + "/getScheduleList";
+    let res = await superagent.request(url, "GET");
+    let text = JSON.parse(res);
     let scheduleList = text.data;
     return scheduleList;
   } catch (error) {
-    console.log('获取定时任务失败:' + error);
+    console.log("更新定时任务失败", error);
   }
 }
 /**
@@ -47,15 +39,10 @@ async function getScheduleList() {
  */
 async function updateSchedule(id) {
   try {
-    let option = {
-      method: 'POST',
-      url: apiConfig.KOAHOST + '/updateSchedule',
-      params: { id: id }
-    };
-    let res = await req(option);
-    console.log('更新定时任务成功');
+    const url = config.HOST + "/updateSchedule";
+    await superagent.request(url, "PUT", { id: id });
   } catch (error) {
-    console.log('更新定时任务失败', error);
+    console.log("更新定时任务失败", error);
   }
 }
 

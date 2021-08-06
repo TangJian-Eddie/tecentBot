@@ -1,4 +1,5 @@
-const config = require("./config");
+const config = require("../config");
+const superagent = require("../api");
 const path = require("path");
 const hugImg = path.resolve(config.HUG_IMG);
 /**
@@ -8,20 +9,20 @@ const hugImg = path.resolve(config.HUG_IMG);
  * @param {*} data  消息主体
  */
 async function onPrivateMessage(bot, data) {
-    if (config.TECENT_ACCOUNT.includes(data.user_id)) {
-        let message = "";
-        for (const item of data.message) {
-          if (item.type === "text") {
-            message = message + item.data.text;
-          }
-        }
-        const res = message.includes("垃圾 ")
-          ? await superagent.getRubbishType(message.replace("垃圾 ", ""))
-          : await superagent.getTXAIAnswer(data.user_id, message);
-        await bot.sendPrivateMsg(data.user_id, res);
-        if (res === "你是最傻的屁")
-          bot.sendPrivateMsg(data.user_id, `[CQ:image,file=${hugImg}]`);
+  if (config.TECENT_ID.includes(data.user_id)) {
+    let message = "";
+    for (const item of data.message) {
+      if (item.type === "text") {
+        message = message + item.data.text;
       }
+    }
+    const res = message.includes("垃圾 ")
+      ? await superagent.getRubbishType(message.replace("垃圾 ", ""))
+      : await superagent.getTXAIAnswer(data.user_id, message);
+    await bot.sendPrivateMsg(data.user_id, res);
+    if (res === "你是最傻的屁")
+      bot.sendPrivateMsg(data.user_id, `[CQ:image,file=${hugImg}]`);
+  }
 }
 
 /**
@@ -31,29 +32,28 @@ async function onPrivateMessage(bot, data) {
  * @param {*} data  消息主体
  */
 async function onGroupMessage(bot, data) {
-    if (config.GROUP_ACCOUNT.includes(data.group_id)) {
-        let message = "";
-        for (const item of data.message) {
-          if (item.type === "text") {
-            message = message + item.data.text;
-          }
-        }
-        // const res = message.includes("垃圾 ")
-        //   ? await superagent.getRubbishType(message.replace("垃圾 ", ""))
-        //   : await superagent.getTXAIAnswer(data.user_id, message);
-        // await bot.sendPrivateMsg(data.user_id, res);
-        // if (res === "你是最傻的屁")
-        //   bot.sendPrivateMsg(data.user_id, `[CQ:image,file=${hugImg}]`);
+  if (config.GROUP_ID.includes(data.group_id)) {
+    let message = "";
+    for (const item of data.message) {
+      if (item.type === "text") {
+        message = message + item.data.text;
       }
+    }
+    // if(message.includes("提问 ")){
+
+    // }
+    // if(message.includes("回答 ")){
+
+    // }
+  }
 }
 
 async function onMessage(bot, msg) {
-    console.log(msg)
-    const MESSAGE_TYPE_MAP = {
-        private: onPrivateMessage,
-        group: onGroupMessage
-    }
-    MESSAGE_TYPE_MAP[msg.message_type](bot, msg)
+  const MESSAGE_TYPE_MAP = {
+    private: onPrivateMessage,
+    group: onGroupMessage,
+  };
+  MESSAGE_TYPE_MAP[msg.message_type](bot, msg);
 }
 
 module.exports = onMessage;
