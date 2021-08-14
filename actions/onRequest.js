@@ -1,17 +1,18 @@
+const { dealErrorWrap } = require('../utils/errorHandler');
 /**
  * 自动通过群申请
  */
 function onGroupRequest(bot, data) {
   // 仅通过主动申请的申请
-  if (data.sub_type === "add") {
-    bot.setGroupAddRequest(data.flag);
+  if (data.sub_type === 'add') {
+    dealErrorWrap(bot, 'setGroupAddRequest', [data.flag]);
   }
 }
 /**
  * 自动通过好友申请
  */
 function onPrivateRequest(bot, data) {
-  bot.setGroupAddRequest(data.flag);
+  dealErrorWrap(bot, 'setFriendAddRequest', [data.flag]);
 }
 
 function onRequest(bot, data) {
