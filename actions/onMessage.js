@@ -1,6 +1,7 @@
+const path = require('path');
 const config = require('../config');
 const superagent = require('../api');
-const path = require('path');
+const { dealErrorWrap } = require('../utils/errorHandler');
 const hugImg = path.resolve(config.HUG_IMG);
 /**
  * 处理私聊消息事件
@@ -139,9 +140,14 @@ async function onGroupMessage(bot, data) {
     // }
   }
   if (config.REMIND_GROUP_ID_LIST.includes(data.group_id)) {
-    // if(@){
-    //     bot.sendPrivateMsg(config.REPORT_ID, `有人在${}@你，请及时查看回复～`)
-    // }
+    for (const item of data.message) {
+      if (item.type === 'at' && item.data.qq === config.USER_CONFIG.uin) {
+        dealErrorWrap(bot, 'sendPrivateMsg', [
+          config.REPORT_ID,
+          `有人在${data.group_name}@你，请及时查看回复～`,
+        ]);
+      }
+    }
   }
 }
 
