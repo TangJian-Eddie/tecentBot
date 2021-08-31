@@ -35,14 +35,16 @@ function initDrinkingSchedule(bot) {
 
 async function initGreeting(bot) {
   const one = await superagent.getOne(); // 获取每日一句
-  const weather = await superagent.getWeather(); // 获取天气信息
   bot.sendPrivateMsg(config.GREET_ID, `${config.NICKNAME}机器人上线了`);
   bot.sendPrivateMsg(
     config.GREET_ID,
     `今天是和${config.NICKNAME}相恋的第${time.getDay(config.MEMORIAL_DAY)}天`
   );
   bot.sendPrivateMsg(config.GREET_ID, one);
-  bot.sendPrivateMsg(config.GREET_ID, weather);
+  for (const item of config.CITY) {
+    const weather = await superagent.getBaiDuWeather(item); // 获取天气信息
+    await bot.sendPrivateMsg(config.GREET_ID, weather);
+  }
 }
 
 /**

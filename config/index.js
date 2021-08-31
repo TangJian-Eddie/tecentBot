@@ -17,8 +17,7 @@ module.exports = {
   NICKNAME: '臭屁屁', // 问候昵称
   GOOD_NIGHT_GREETING: '不知不觉又到了一天说再见的时间了，臭屁屁早些休息哦~',
   MEMORIAL_DAY: '2018/02/08',
-  CITY: 'shanghai/changning-district',
-  CITY_NAME: '上海市长宁区',
+  CITY: ['上海市长宁区', '香港'],
   HUG_IMG: './assets/EAB1F74492BB2AE64127D8C567F2364A.gif',
   INIT_TIME: { minute: 30, hour: 6 }, //上线问候发送时间 每天6点30分发送
   // 提醒喝水时间
