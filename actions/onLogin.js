@@ -6,32 +6,9 @@ const time = require('../utils/time');
 const onRequest = require('./onRequest');
 
 function initSchedule(bot) {
-  // initRemindSchedule(bot);
   initGreetingSchedule(bot);
   initDrinkingSchedule(bot);
 }
-/**
- * 设置定时任务
- * @param {*} that bot 对象
- * @param {*} item 定时任务项
- */
-// async function initRemindSchedule(bot) {
-//   console.log(bot);
-// const scheduleList = await superagent.getScheduleList();
-// for (const item of scheduleList) {
-//   let time = item.isLoop ? item.time : new Date(item.time);
-//   schedule.scheduleJob(time, async () => {
-//     try {
-//       await bot.sendPrivateMsg(item.subscribe, item.content);
-//       if (!item.isLoop) {
-//         await superagent.updateSchedule(item._id);
-//       }
-//     } catch (error) {
-//       console.log("设置定时任务错误", error);
-//     }
-//   });
-// }
-// }
 // 每天问候任务
 function initGreetingSchedule(bot) {
   schedule.setSchedule(config.INIT_TIME, () => {

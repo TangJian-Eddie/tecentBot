@@ -4,48 +4,6 @@ const cheerio = require('cheerio');
 const ONE = 'http://wufazhuce.com/'; // ONE的web版网站
 const weatherURL = `https://tianqi.moji.com/weather/china/${config.CITY}`;
 
-/**
- * 设置定时提醒任务
- * @param {*} obj 任务详情
- * @returns {*} 任务详情
- */
-async function setSchedule(obj) {
-  try {
-    const url = config.HOST + '/addSchedule';
-    let res = await superagent.request(url, 'POST', null, obj);
-    let content = JSON.parse(res);
-    return content.data;
-  } catch (error) {
-    console.log('更新定时任务失败', error);
-  }
-}
-
-/**
- * 获取定时提醒任务列表
- */
-async function getScheduleList() {
-  try {
-    const url = config.HOST + '/getScheduleList';
-    let res = await superagent.request(url, 'GET');
-    let text = JSON.parse(res);
-    let scheduleList = text.data;
-    return scheduleList;
-  } catch (error) {
-    console.log('更新定时任务失败', error);
-  }
-}
-/**
- * 更新定时提醒任务
- */
-async function updateSchedule(id) {
-  try {
-    const url = config.HOST + '/updateSchedule';
-    await superagent.request(url, 'PUT', { id: id });
-  } catch (error) {
-    console.log('更新定时任务失败', error);
-  }
-}
-
 // 获取每日一句
 async function getOne() {
   try {
