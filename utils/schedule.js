@@ -13,7 +13,7 @@ function setSchedule(rule, callback) {
   } else {
     throw new Error();
   }
-  schedule.scheduleJob(date, callback);
+  return schedule.scheduleJob(date, callback);
 }
 
 module.exports = {

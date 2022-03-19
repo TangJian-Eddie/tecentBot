@@ -1,9 +1,12 @@
 const schedule = require('../utils/schedule');
-const { dealErrorWrap } = require('../utils/errorHandler');
 const superagent = require('../api');
 const config = require('../config');
 const time = require('../utils/time');
 const onRequest = require('./onRequest');
+
+let GREET_JOB;
+let OFF_JOB;
+let DRINK_JOB;
 
 function initSchedule(bot) {
   initGreetingSchedule(bot);
@@ -11,26 +14,26 @@ function initSchedule(bot) {
 }
 // 每天问候任务
 function initGreetingSchedule(bot) {
-  schedule.setSchedule(config.INIT_TIME, () => {
-    initGreeting(bot);
-    clearRequestList(bot);
-  });
-  schedule.setSchedule(config.OFFLINE_TIME, () => {
-    dealErrorWrap(bot, 'sendPrivateMsg', [
-      config.GREET_ID,
-      config.GOOD_NIGHT_GREETING,
-    ]);
-  });
+  if (!GREET_JOB) {
+    GREET_JOB = schedule.setSchedule(config.INIT_TIME, () => {
+      initGreeting(bot);
+      clearRequestList(bot);
+    });
+  }
+  if (!OFF_JOB) {
+    OFF_JOB = schedule.setSchedule(config.OFFLINE_TIME, () => {
+      bot.sendPrivateMsg(config.GREET_ID, config.GOOD_NIGHT_GREETING);
+    });
+  }
 }
 
 // 定时喝水任务
 function initDrinkingSchedule(bot) {
-  schedule.setSchedule(config.REMIND_TIME, () => {
-    dealErrorWrap(bot, 'sendPrivateMsg', [
-      config.GREET_ID,
-      '到整点的喝水时间了',
-    ]);
-  });
+  if (!DRINK_JOB) {
+    DRINK_JOB = schedule.setSchedule(config.REMIND_TIME, () => {
+      bot.sendPrivateMsg(config.GREET_ID, '到整点的喝水时间了');
+    });
+  }
 }
 
 async function initGreeting(bot) {
